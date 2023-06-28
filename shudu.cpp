@@ -122,7 +122,7 @@ void shudu::generateSudoku() {
     for (int i = 0; i < N * N; i++) {
         positions[i] = i;
     }
-    
+    srand( (unsigned)time( NULL ) );
     random_shuffle(positions.begin(), positions.end());
     solveSudoku();
     // printSudoku();
@@ -163,6 +163,7 @@ int main(int argc, char* argv[]) {
     const char* optstring = "c:s:n:m:";
     int o;
     string filepath;
+    int mode=1;//1生成 2求解 3生成唯一解
     int num=1;
     while ((o = getopt(argc, argv, optstring)) != -1) {
         switch (o) {
@@ -177,18 +178,18 @@ int main(int argc, char* argv[]) {
         }
     }
     shudu a;
-
-    int count=0;
-    while(count<num){
-        string strcount=to_string(count+1);
-        filepath=".\\file\\"+strcount+".txt";
-        srand( (unsigned)time( 0 )+count );
-        a.generateSudoku();
-        a.writeSudokuToFile(filepath);
-        a.clean();
-        count++;
+    if(mode==1){
+        int count=0;
+        while(count<num){
+            string strcount=to_string(count+1);
+            filepath=".\\file\\"+strcount+".txt";
+            
+            a.generateSudoku();
+            a.writeSudokuToFile(filepath);
+            a.clean();
+            count++;
+        }
     }
-
     
     
     
