@@ -125,7 +125,7 @@ void shudu::generateSudoku() {
     
     random_shuffle(positions.begin(), positions.end());
     solveSudoku();
-    printSudoku();
+    // printSudoku();
     // 填入空缺位置
     for (int i = 0; i < NUM_EMPTY_CELLS; i++) {
         int pos = positions[i];
@@ -133,6 +133,12 @@ void shudu::generateSudoku() {
         int col = pos % N;
         grid[row][col] = EMPTY_CELL;
     }
+}
+
+void shudu::clean() {
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++)
+            grid[i][j] = 0;
 }
 
 // 将数独写入文件
@@ -152,11 +158,26 @@ void shudu::writeSudokuToFile(string filename) {
     }
 }
 
-int main(){
+
+int main(int argc, char* argv[]) {
+    const char* optstring = "c:s:n:m:";
+    int o;
+    string filepath;
+    while ((o = getopt(argc, argv, optstring)) != -1) {
+        switch (o) {
+            case 's':
+                filepath = optarg;
+                cout<<filepath<<endl;
+                break;
+            default:break;
+        }
+    }
     shudu a;
+
     a.generateSudoku();
-    cout<<"generated sudu"<<endl;
-    a.printSudoku();
-    cout<<"solved sudu"<<endl;
-    a.solveSudoku();
+    a.writeSudokuToFile(filepath);
+    a.clean();
+     
+    
+    return 0;
 }
