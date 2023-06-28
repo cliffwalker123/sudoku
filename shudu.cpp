@@ -163,8 +163,12 @@ int main(int argc, char* argv[]) {
     const char* optstring = "c:s:n:m:";
     int o;
     string filepath;
+    int num=1;
     while ((o = getopt(argc, argv, optstring)) != -1) {
         switch (o) {
+            case 'c':
+                num = atoi(optarg);
+                break;
             case 's':
                 filepath = optarg;
                 cout<<filepath<<endl;
@@ -174,10 +178,19 @@ int main(int argc, char* argv[]) {
     }
     shudu a;
 
-    a.generateSudoku();
-    a.writeSudokuToFile(filepath);
-    a.clean();
-     
+    int count=0;
+    while(count<num){
+        string strcount=to_string(count+1);
+        filepath=".\\file\\"+strcount+".txt";
+        srand( (unsigned)time( 0 )+count );
+        a.generateSudoku();
+        a.writeSudokuToFile(filepath);
+        a.clean();
+        count++;
+    }
+
+    
+    
     
     return 0;
 }
