@@ -122,7 +122,7 @@ void shudu::generateSudoku() {
     for (int i = 0; i < N * N; i++) {
         positions[i] = i;
     }
-    srand( (unsigned)time( NULL ) );
+    
     random_shuffle(positions.begin(), positions.end());
     solveSudoku();
     // printSudoku();
@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
         while(count<num){
             string strcount=to_string(count+1);
             filepath=".\\file\\"+strcount+".txt";
-            
+            srand( (unsigned)time( 0 )+count );
             a.generateSudoku();
             a.writeSudokuToFile(filepath);
             a.clean();
