@@ -135,6 +135,23 @@ void shudu::generateSudoku() {
     }
 }
 
+// 将数独写入文件
+void shudu::writeSudokuToFile(string filename) {
+    ofstream file(filename);
+    if (file.is_open()) {
+        for (int row = 0; row < N; row++) {
+            for (int col = 0; col < N; col++) {
+                file << grid[row][col] << " ";
+            }
+            file << endl;
+        }
+        file.close();
+        cout << "Sudoku written to file: " << filename << endl;
+    } else {
+        cout << "Unable to open file: " << filename << endl;
+    }
+}
+
 int main(){
     shudu a;
     a.generateSudoku();
