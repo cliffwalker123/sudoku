@@ -1,15 +1,48 @@
 ﻿#include <iostream>
+#include <fstream>
 #include <vector>
 #include <algorithm>
 #include <random>
+#include <time.h>
+#include <stdio.h>
+#include <unistd.h>
 using namespace std;
 
-const int N = 9;
-const int EMPTY_CELL = 0;
-const int NUM_EMPTY_CELLS = 40;  // 填入的空缺位置数量
+#define N 9
+#define EMPTY_CELL 0
 
-// 检查在(row, col)位置上填入数字num是否合法
-bool isValid(int grid[N][N], int row, int col, int num) {
+int NUM_EMPTY_CELLS = 40;  // 填入的空缺位置数量
+
+class shudu {
+private:
+	int grid[N][N];
+public:
+	shudu() {
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				grid[i][j] = 0;
+	}
+    void printSudoku() {
+        for (int row = 0; row < N; row++) {
+            if (row % 3 == 0)
+                cout << "--------------------" << endl;
+            for (int col = 0; col < N; col++) {
+                if (col % 3 == 0)
+                    cout << "|";
+                cout << grid[row][col];
+                if (col != 8)cout << " ";
+                else cout << "|";
+            }
+            cout << endl;
+        }
+    }
+    bool isValid(int row, int col, int num);// 检查在(row, col)位置上填入数字num是否合法
+    bool solveSudoku();// 递归求解数独
+    void generateSudoku();//生成数独
+    void clean();
+    void writeSudokuToFile(const string filename);
+};
+bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
     for (int i = 0; i < N; i++) {
         if (grid[row][i] == num || grid[i][col] == num) {
@@ -30,9 +63,7 @@ bool isValid(int grid[N][N], int row, int col, int num) {
 
     return true;
 }
-
-// 递归求解数独
-bool solveSudoku(int grid[N][N]) {
+bool shudu::solveSudoku() {
     int row, col;
 
     // 找到一个未填数字的位置
@@ -55,18 +86,18 @@ bool solveSudoku(int grid[N][N]) {
     }
 
     // 生成随机数字的顺序
-    vector<int> nums {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    vector<int> nums{ 1, 2, 3, 4, 5, 6, 7, 8, 9 };
     random_device rd;
     mt19937 g(rd());
     shuffle(nums.begin(), nums.end(), g);
 
     // 尝试填入随机顺序的数字
     for (int num : nums) {
-        if (isValid(grid, row, col, num)) {
+        if (isValid(row, col, num)) {
             grid[row][col] = num;
 
             // 递归求解剩余的空格
-            if (solveSudoku(grid)) {
+            if (solveSudoku()) {
                 return true;
             }
 
@@ -78,8 +109,7 @@ bool solveSudoku(int grid[N][N]) {
     return false;
 }
 
-// 生成数独
-void generateSudoku(int grid[N][N]) {
+void shudu::generateSudoku() {
     // 初始化为全0
     for (int row = 0; row < N; row++) {
         for (int col = 0; col < N; col++) {
@@ -92,8 +122,10 @@ void generateSudoku(int grid[N][N]) {
     for (int i = 0; i < N * N; i++) {
         positions[i] = i;
     }
+    
     random_shuffle(positions.begin(), positions.end());
-
+    solveSudoku();
+    printSudoku();
     // 填入空缺位置
     for (int i = 0; i < NUM_EMPTY_CELLS; i++) {
         int pos = positions[i];
@@ -101,26 +133,13 @@ void generateSudoku(int grid[N][N]) {
         int col = pos % N;
         grid[row][col] = EMPTY_CELL;
     }
-
-    solveSudoku(grid);
 }
 
-// 打印数独
-void printSudoku(int grid[N][N]) {
-    for (int row = 0; row < N; row++) {
-        for (int col = 0; col < N; col++) {
-            cout << grid[row][col] << " ";
-        }
-        cout << endl;
-    }
-}
-
-int main() {
-    int grid[N][N];
-
-    generateSudoku(grid);
-    cout << "Generated Sudoku:" << endl;
-    printSudoku(grid);
-
-    return 0;
+int main(){
+    shudu a;
+    a.generateSudoku();
+    cout<<"generated sudu"<<endl;
+    a.printSudoku();
+    cout<<"solved sudu"<<endl;
+    a.solveSudoku();
 }
