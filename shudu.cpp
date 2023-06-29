@@ -29,7 +29,10 @@ public:
             for (int col = 0; col < N; col++) {
                 if (col % 3 == 0)
                     cout << "|";
-                cout << grid[row][col];
+                if(grid[row][col]==EMPTY_CELL)
+                    cout << "$";
+                else
+                    cout << grid[row][col];
                 if (col != 8)cout << " ";
                 else cout << "|";
             }
@@ -41,6 +44,7 @@ public:
     void generateSudoku();//生成数独
     void clean();
     void writeSudokuToFile(const string filename);
+    bool readSudokuFromFile(string filename);
 };
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
@@ -147,7 +151,10 @@ void shudu::writeSudokuToFile(string filename) {
     if (file.is_open()) {
         for (int row = 0; row < N; row++) {
             for (int col = 0; col < N; col++) {
-                file << grid[row][col] << " ";
+                if(grid[row][col]==EMPTY_CELL)
+                    file << "$" << " ";
+                else
+                    file << grid[row][col] << " ";
             }
             file << endl;
         }
@@ -155,6 +162,33 @@ void shudu::writeSudokuToFile(string filename) {
         cout << "Sudoku written to file: " << filename << endl;
     } else {
         cout << "Unable to open file: " << filename << endl;
+    }
+}
+
+// 从文件中读取数独
+bool shudu::readSudokuFromFile(string filename) {
+    ifstream file(filename);
+    if (file.is_open()) {
+        for (int row = 0; row < N; row++) {
+            for (int col = 0; col < N; col++) {
+                string cell;
+                if (!(file >> cell)) {
+                    cout << "Invalid Sudoku data in file: " << filename << endl;
+                    return false;
+                }
+
+                if (cell == "$") {
+                    grid[row][col] = EMPTY_CELL;
+                } else {
+                    grid[row][col] = stoi(cell);
+                }
+            }
+        }
+        file.close();
+        return true;
+    } else {
+        cout << "Unable to open file: " << filename << endl;
+        return false;
     }
 }
 
@@ -171,6 +205,7 @@ int main(int argc, char* argv[]) {
                 num = atoi(optarg);
                 break;
             case 's':
+                mode=2;
                 filepath = optarg;
                 cout<<filepath<<endl;
                 break;
@@ -186,9 +221,17 @@ int main(int argc, char* argv[]) {
             srand( (unsigned)time( 0 )+count );
             a.generateSudoku();
             a.writeSudokuToFile(filepath);
+            a.printSudoku();
             a.clean();
             count++;
         }
+    }
+    else if(mode==2){
+        a.readSudokuFromFile(filepath);
+        a.printSudoku();
+        cout<<"solved shudu"<<endl;
+        a.solveSudoku();
+        a.printSudoku();
     }
     
     
