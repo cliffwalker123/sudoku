@@ -24,6 +24,9 @@ bool checkflags(bool nmfu[4]){
         cout << "Error: Both -u and -n parameters must be used together." << endl;
         return false;
     }
+    if(nmfu[1]&&nmfu[2]){
+        cout << "Error: Both -m and -f parameters can't be used together." << endl;
+    }
     return true;
 }
 class shudu {
@@ -212,14 +215,15 @@ bool shudu::readSudokuFromFile(string filename) {
 
 
 int main(int argc, char* argv[]) {
-    const char* optstring = "c:s:n:m:f:u:";
-    
+    shudu a;
+    const char* optstring = "c:s:n:m:f:u:";  
     for(int i=0;i<4;i++)nmfu[i]=false;
     int o;
     string filepath;
     int mode=1;//1生成终盘 2求解 3生成游戏
     int num=1;//生成的数量
     int difficulty = 1;  // 游戏难度级别，默认为1
+    int EmptyCells=20;
     while ((o = getopt(argc, argv, optstring)) != -1) {
         switch (o) {
             case 'c':
@@ -237,9 +241,11 @@ int main(int argc, char* argv[]) {
                 break;
             case 'm':
                 nmfu[1]=true;
+                difficulty = atoi(optarg);
                 break;
             case 'f':
                 nmfu[2]=true;
+                EmptyCells = atoi(optarg);
                 break;
             case 'u':
                 nmfu[3]=true;
@@ -249,8 +255,27 @@ int main(int argc, char* argv[]) {
     }
     if(!checkflags(nmfu))
         return 0;
-    shudu a;
-
+    switch (difficulty)
+    {
+    case 1:break;
+    case 2:
+        EmptyCells=38;
+        a.setNumEmptyCells(EmptyCells);
+        break;
+    case 3:
+        EmptyCells=55;
+        a.setNumEmptyCells(EmptyCells);
+        break;
+    default:
+        cout<<"ERROR: difficulty should be in [1,2,3]"<<endl;
+        return 0;
+    }
+    if(EmptyCells>=20&&EmptyCells<=55)
+        a.setNumEmptyCells(EmptyCells);
+    else{
+        cout<<"ERROR: EmptyCells should be in [20-55]"<<endl;
+        return 0;
+    }
     if(mode==1){
         int count=0;
         while(count<num){
