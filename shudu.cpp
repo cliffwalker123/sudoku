@@ -57,6 +57,19 @@ public:
         }
     }
     bool isValid(int row, int col, int num);// 检查在(row, col)位置上填入数字num是否合法
+    bool AllValid(){
+        for (int i = 0; i < N; i++){
+			for (int j = 0; j < N; j++){
+                if((grid[i][j]!=0)&&!isValid(i,j,grid[i][j])){
+                    cout<<"find wrong in:("<<i<<","<<j<<")"<<endl;
+                    return false;
+                }
+                    
+            }
+        }
+        
+        return true;
+    }
     bool solveSudoku();// 递归求解数独
     void generateSudoku();//生成数独
     void clean();
@@ -77,18 +90,21 @@ public:
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
     for (int i = 0; i < N; i++) {
-        if (grid[row][i] == num || grid[i][col] == num) {
+        if (grid[row][i] == num && i!=col) {
+            return false;
+        }
+        if (grid[i][col] == num && i!=row) {
             return false;
         }
     }
-
     // 检查小九宫格
     int startRow = row - row % 3;
     int startCol = col - col % 3;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (grid[i + startRow][j + startCol] == num) {
-                return false;
+                if(((i + startRow)!=row)||((j + startCol)!=col))
+                    return false;
             }
         }
     }
@@ -382,6 +398,15 @@ int main(int argc, char* argv[]) {
     }
     else if(mode==2){
         a.readSudokuFromFile(filepath);
+        if(!a.AllValid()){
+            cout<<"Wrong input game"<<endl;
+            return 0;
+        }
+        if(!a.hasempty()){
+            cout<<"Bo need to solve, game is full"<<endl;
+            a.printSudoku();
+            return 0;
+        }
         a.printSudoku();
         if(a.solveSudoku()){
             cout<<"solved shudu"<<endl;
