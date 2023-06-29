@@ -383,9 +383,13 @@ int main(int argc, char* argv[]) {
     else if(mode==2){
         a.readSudokuFromFile(filepath);
         a.printSudoku();
-        cout<<"solved shudu"<<endl;
-        a.solveSudoku();
-        a.printSudoku();
+        if(a.solveSudoku()){
+            cout<<"solved shudu"<<endl;
+            a.printSudoku();
+        } 
+        else{
+            cout<<"the game has no result";
+        }  
     }
     else if(mode==3){
         if(!only){
