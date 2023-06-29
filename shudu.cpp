@@ -10,14 +10,29 @@ using namespace std;
 
 #define N 9
 #define EMPTY_CELL 0
-
-int NUM_EMPTY_CELLS = 40;  // 填入的空缺位置数量
-
+bool nmfu[4];
+bool checkflags(bool nmfu[4]){
+    if(nmfu[1]&&!nmfu[0]){
+        cout << "Error: Both -m and -n parameters must be used together." << endl;
+        return false;
+    }
+    if(nmfu[2]&&!nmfu[0]){
+        cout << "Error: Both -f and -n parameters must be used together." << endl;
+        return false;
+    }
+    if(nmfu[3]&&!nmfu[0]){
+        cout << "Error: Both -u and -n parameters must be used together." << endl;
+        return false;
+    }
+    return true;
+}
 class shudu {
 private:
 	int grid[N][N];
+    int NUM_EMPTY_CELLS;    // 填入的空缺位置数量
 public:
 	shudu() {
+        NUM_EMPTY_CELLS = 20;
 		for (int i = 0; i < N; i++)
 			for (int j = 0; j < N; j++)
 				grid[i][j] = 0;
@@ -45,6 +60,9 @@ public:
     void clean();
     void writeSudokuToFile(const string filename);
     bool readSudokuFromFile(string filename);
+    void setNumEmptyCells(int num){
+        NUM_EMPTY_CELLS = num;
+    }
 };
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
@@ -194,11 +212,14 @@ bool shudu::readSudokuFromFile(string filename) {
 
 
 int main(int argc, char* argv[]) {
-    const char* optstring = "c:s:n:m:";
+    const char* optstring = "c:s:n:m:f:u:";
+    
+    for(int i=0;i<4;i++)nmfu[i]=false;
     int o;
     string filepath;
-    int mode=1;//1生成 2求解 3生成唯一解
-    int num=1;
+    int mode=1;//1生成终盘 2求解 3生成游戏
+    int num=1;//生成的数量
+    int difficulty = 1;  // 游戏难度级别，默认为1
     while ((o = getopt(argc, argv, optstring)) != -1) {
         switch (o) {
             case 'c':
@@ -209,17 +230,35 @@ int main(int argc, char* argv[]) {
                 filepath = optarg;
                 cout<<filepath<<endl;
                 break;
+            case 'n':
+                nmfu[0]=true;
+                mode = 3;
+                num = atoi(optarg);
+                break;
+            case 'm':
+                nmfu[1]=true;
+                break;
+            case 'f':
+                nmfu[2]=true;
+                break;
+            case 'u':
+                nmfu[3]=true;
+                break;
             default:break;
         }
     }
+    if(!checkflags(nmfu))
+        return 0;
     shudu a;
+
     if(mode==1){
         int count=0;
         while(count<num){
             string strcount=to_string(count+1);
-            filepath=".\\file\\"+strcount+".txt";
+            filepath=".\\EndGameFile\\"+strcount+".txt";
             srand( (unsigned)time( 0 )+count );
             a.generateSudoku();
+            a.solveSudoku();
             a.writeSudokuToFile(filepath);
             a.printSudoku();
             a.clean();
@@ -232,6 +271,19 @@ int main(int argc, char* argv[]) {
         cout<<"solved shudu"<<endl;
         a.solveSudoku();
         a.printSudoku();
+    }
+    else if(mode==3){
+        int count=0;
+        while(count<num){
+            string strcount=to_string(count+1);
+            filepath=".\\GameFile\\"+strcount+".txt";
+            srand( (unsigned)time( 0 )+count );
+            a.generateSudoku();
+            a.writeSudokuToFile(filepath);
+            a.printSudoku();
+            a.clean();
+            count++;
+        }
     }
     
     
