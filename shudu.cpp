@@ -30,10 +30,9 @@ bool checkflags(bool nmfu[4]){
     return true;
 }
 class shudu {
-private:
-	int grid[N][N];
-    int NUM_EMPTY_CELLS;    // 填入的空缺位置数量
 public:
+    int grid[N][N];
+    int NUM_EMPTY_CELLS;    // 填入的空缺位置数量
 	shudu() {
         NUM_EMPTY_CELLS = 20;
 		for (int i = 0; i < N; i++)
@@ -66,7 +65,14 @@ public:
     void setNumEmptyCells(int num){
         NUM_EMPTY_CELLS = num;
     }
+    bool hasempty();
+    bool checkonly();
     void generateOnlySudoku();
+    void copysudu(shudu t){
+        for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				t.grid[i][j] = this->grid[i][j];
+    }
 };
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
@@ -214,6 +220,54 @@ bool shudu::readSudokuFromFile(string filename) {
     }
 }
 
+bool shudu::hasempty(){
+    for(int i=0;i<N;i++){
+        for(int j=0;j<N;j++){
+            if(grid[i][j]==EMPTY_CELL)
+                return true;
+        }
+    }
+    return false;
+}
+bool shudu::checkonly(){
+    int resultnum=0;
+    int nownum=0;
+    shudu fuben;
+    copysudu(fuben);
+    while(fuben.hasempty()){
+        int row, col;
+
+        // 找到一个未填数字的位置(row, col)
+        for (row = 0; row < N; row++) {
+            for (col = 0; col < N; col++) {
+                if (fuben.grid[row][col] == EMPTY_CELL) {
+                    break;
+                }
+            }
+        }
+
+        for(int trynum=0;trynum<N;trynum++){
+            if (fuben.isValid(row, col, trynum)) {
+                shudu temp;
+                fuben.copysudu(temp);
+                temp.grid[row][col]=trynum;
+                // 递归求解剩余的空格
+                if (temp.solveSudoku()) {
+                    resultnum++;
+                    nownum=trynum;            
+                }
+            }
+        }
+        if(resultnum>1)
+            return false;
+        else{
+            fuben.grid[row][col]=nownum;
+        }
+
+    }
+    return true;
+}
+
 void shudu::generateOnlySudoku() {
     // 初始化为全0
     for (int row = 0; row < N; row++) {
@@ -226,7 +280,7 @@ void shudu::generateOnlySudoku() {
     solveSudoku();
     int count=0;
     // 移除数字直到解不再唯一,并且最多移除30个
-    while (count<30) {
+    while (count<70) {
         // 随机选择要移除的位置
         int row = rand() % N;
         int col = rand() % N;
@@ -236,24 +290,8 @@ void shudu::generateOnlySudoku() {
 
         // 暂时移除数字
         grid[row][col] = EMPTY_CELL;
-
-        // 尝试解数独
-        vector<vector<int>> tempGrid;
-        for (int i = 0; i < N; i++) {
-            vector<int> tempRow;
-            for (int j = 0; j < N; j++) {
-                tempRow.push_back(grid[i][j]);
-            }
-            tempGrid.push_back(tempRow);
-        }
-
-        shudu tempSudoku;
-        for(int i=0;i<N;i++){
-            for(int j=0;j<N;j++){
-                tempSudoku.grid[i][j]=tempGrid[i][j];
-            }
-        }
-        if (!tempSudoku.solveSudoku()) {
+        
+        if (!checkonly()) {
             // 如果解不唯一，则恢复移除的数字
             grid[row][col] = removedNum;
             break;
