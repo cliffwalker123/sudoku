@@ -210,6 +210,21 @@ void shudu::writeSudokuToFile(string filename) {
     }
 }
 
+bool checknum(string num){
+    if(num=="0")return true;
+    if(num=="1")return true;
+    if(num=="2")return true;
+    if(num=="3")return true;
+    if(num=="4")return true;
+    if(num=="5")return true;
+    if(num=="6")return true;
+    if(num=="7")return true;
+    if(num=="8")return true;
+    if(num=="9")return true;
+    if(num==" ")return true;
+    return false;
+}
+
 // 从文件中读取数独
 bool shudu::readSudokuFromFile(string filename) {
     ifstream file(filename);
@@ -217,14 +232,15 @@ bool shudu::readSudokuFromFile(string filename) {
         for (int row = 0; row < N; row++) {
             for (int col = 0; col < N; col++) {
                 string cell;
-                if (!(file >> cell)) {
-                    cout << "Invalid Sudoku data in file: " << filename << endl;
-                    return false;
-                }
-
+                file >> cell;
                 if (cell == "$") {
                     grid[row][col] = EMPTY_CELL;
-                } else {
+                } else if(!checknum(cell)){
+                    cout<<cell<<endl;
+                    cout<<"wrong data"<<endl;
+                    return false;
+                }
+                else{
                     grid[row][col] = stoi(cell);
                 }
             }
@@ -240,8 +256,9 @@ bool shudu::readSudokuFromFile(string filename) {
 bool shudu::hasempty(){
     for(int i=0;i<N;i++){
         for(int j=0;j<N;j++){
-            if(grid[i][j]==EMPTY_CELL)
+            if(grid[i][j]==EMPTY_CELL){
                 return true;
+            }  
         }
     }
     return false;
@@ -251,19 +268,26 @@ bool shudu::checkonly(){
     int nownum=0;
     shudu fuben;
     copysudu(fuben);
+    fuben.printSudoku();
     while(fuben.hasempty()){
+        // fuben.printSudoku();
         int row, col;
-
+        bool flag=false;
         // 找到一个未填数字的位置(row, col)
         for (row = 0; row < N; row++) {
             for (col = 0; col < N; col++) {
                 if (fuben.grid[row][col] == EMPTY_CELL) {
+                    flag=true;
                     break;
                 }
             }
+            if(flag){
+                break;
+            }
+            // cout<<endl;
         }
-
-        for(int trynum=0;trynum<N;trynum++){
+        cout<<row<<","<<col<<endl;
+        for(int trynum=1;trynum<N;trynum++){
             if (fuben.isValid(row, col, trynum)) {
                 shudu temp;
                 fuben.copysudu(temp);
@@ -271,10 +295,12 @@ bool shudu::checkonly(){
                 // 递归求解剩余的空格
                 if (temp.solveSudoku()) {
                     resultnum++;
-                    nownum=trynum;            
+                    nownum=trynum;
+                    cout<<trynum<<"aaa"<<endl;       
                 }
             }
         }
+        cout<<resultnum<<endl;
         if(resultnum>1)
             return false;
         else{
@@ -297,17 +323,22 @@ void shudu::generateOnlySudoku() {
     solveSudoku();
     int count=0;
     // 移除数字直到解不再唯一,并且最多移除30个
-    while (count<70) {
+    while (count<5) {
         // 随机选择要移除的位置
+        // srand(time(0));
         int row = rand() % N;
         int col = rand() % N;
-
+        cout<<row<<","<<col<<endl;
+        if(grid[row][col]==EMPTY_CELL){
+            count++;
+            continue;
+        }
         // 保存要移除的数字
         int removedNum = grid[row][col];
-
+        
         // 暂时移除数字
         grid[row][col] = EMPTY_CELL;
-        
+        printSudoku();
         if (!checkonly()) {
             // 如果解不唯一，则恢复移除的数字
             grid[row][col] = removedNum;
@@ -321,7 +352,7 @@ void shudu::generateOnlySudoku() {
 
 int main(int argc, char* argv[]) {
     shudu a;
-    const char* optstring = "c:s:n:m:f:u:";  
+    const char* optstring = "c:s:n:m:f:u::";  
     for(int i=0;i<4;i++)nmfu[i]=false;
     int o;
     string filepath;
@@ -357,7 +388,9 @@ int main(int argc, char* argv[]) {
                 nmfu[3]=true;
                 only=true;
                 break;
-            default:break;
+            default:
+                cout<<"unknown options:"<<o<<endl;
+                break;
         }
     }
     if(!checkflags(nmfu))
@@ -398,7 +431,9 @@ int main(int argc, char* argv[]) {
         }
     }
     else if(mode==2){
-        a.readSudokuFromFile(filepath);
+        if(!a.readSudokuFromFile(filepath)){
+            return 0;
+        }
         if(!a.AllValid()){
             cout<<"Wrong input game"<<endl;
             return 0;
