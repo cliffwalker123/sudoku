@@ -66,6 +66,7 @@ public:
     void setNumEmptyCells(int num){
         NUM_EMPTY_CELLS = num;
     }
+    void generateOnlySudoku();
 };
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
@@ -213,6 +214,55 @@ bool shudu::readSudokuFromFile(string filename) {
     }
 }
 
+void shudu::generateOnlySudoku() {
+    // 初始化为全0
+    for (int row = 0; row < N; row++) {
+        for (int col = 0; col < N; col++) {
+            grid[row][col] = EMPTY_CELL;
+        }
+    }
+
+    // 生成完整的数独
+    solveSudoku();
+    int count=0;
+    // 移除数字直到解不再唯一,并且最多移除30个
+    while (count<30) {
+        // 随机选择要移除的位置
+        int row = rand() % N;
+        int col = rand() % N;
+
+        // 保存要移除的数字
+        int removedNum = grid[row][col];
+
+        // 暂时移除数字
+        grid[row][col] = EMPTY_CELL;
+
+        // 尝试解数独
+        vector<vector<int>> tempGrid;
+        for (int i = 0; i < N; i++) {
+            vector<int> tempRow;
+            for (int j = 0; j < N; j++) {
+                tempRow.push_back(grid[i][j]);
+            }
+            tempGrid.push_back(tempRow);
+        }
+
+        shudu tempSudoku;
+        for(int i=0;i<N;i++){
+            for(int j=0;j<N;j++){
+                tempSudoku.grid[i][j]=tempGrid[i][j];
+            }
+        }
+        if (!tempSudoku.solveSudoku()) {
+            // 如果解不唯一，则恢复移除的数字
+            grid[row][col] = removedNum;
+            break;
+        }
+        count++;
+    }
+
+    // printSudoku();
+}
 
 int main(int argc, char* argv[]) {
     shudu a;
@@ -224,6 +274,7 @@ int main(int argc, char* argv[]) {
     int num=1;//生成的数量
     int difficulty = 1;  // 游戏难度级别，默认为1
     int EmptyCells=20;
+    bool only=false; //生成的解是否唯一
     while ((o = getopt(argc, argv, optstring)) != -1) {
         switch (o) {
             case 'c':
@@ -249,6 +300,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'u':
                 nmfu[3]=true;
+                only=true;
                 break;
             default:break;
         }
@@ -298,20 +350,32 @@ int main(int argc, char* argv[]) {
         a.printSudoku();
     }
     else if(mode==3){
-        int count=0;
-        while(count<num){
-            string strcount=to_string(count+1);
-            filepath=".\\GameFile\\"+strcount+".txt";
-            srand( (unsigned)time( 0 )+count );
-            a.generateSudoku();
-            a.writeSudokuToFile(filepath);
-            a.printSudoku();
-            a.clean();
-            count++;
+        if(!only){
+            int count=0;
+            while(count<num){
+                string strcount=to_string(count+1);
+                filepath=".\\GameFile\\"+strcount+".txt";
+                srand( (unsigned)time( 0 )+count );
+                a.generateSudoku();
+                a.writeSudokuToFile(filepath);
+                a.printSudoku();
+                a.clean();
+                count++;
+            }
+        }
+        else{
+            int count=0;
+            while(count<num){
+                string strcount=to_string(count+1);
+                filepath=".\\GameFile\\"+strcount+".txt";
+                srand( (unsigned)time( 0 )+count );
+                a.generateOnlySudoku();
+                a.writeSudokuToFile(filepath);
+                a.printSudoku();
+                a.clean();
+                count++;
+            }
         }
     }
-    
-    
-    
     return 0;
 }
