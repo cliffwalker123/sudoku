@@ -81,7 +81,7 @@ public:
     bool hasempty();
     bool checkonly();
     void generateOnlySudoku();
-    void copysudu(shudu t){
+    void copysudu(shudu& t){
         for (int i = 0; i < N; i++)
 			for (int j = 0; j < N; j++)
 				t.grid[i][j] = this->grid[i][j];
@@ -89,11 +89,12 @@ public:
 };
 bool shudu::isValid(int row, int col, int num) {
     // 检查行和列
+    if(row<0||row>=9||col<0||col>9)return false;
     for (int i = 0; i < N; i++) {
-        if (grid[row][i] == num && i!=col) {
+        if ((grid[row][i] == num) && (i!=col)) {
             return false;
         }
-        if (grid[i][col] == num && i!=row) {
+        if ((grid[i][col] == num) && (i!=row)) {
             return false;
         }
     }
@@ -363,12 +364,12 @@ int main(int argc, char* argv[]) {
         return 0;
     switch (difficulty)
     {
-    case 1:break;
-    case 2:
+    case 1:break;//初级不需要变化
+    case 2://中级38个空的
         EmptyCells=38;
         a.setNumEmptyCells(EmptyCells);
         break;
-    case 3:
+    case 3://高级55个空的
         EmptyCells=55;
         a.setNumEmptyCells(EmptyCells);
         break;
